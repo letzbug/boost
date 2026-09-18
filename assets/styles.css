@@ -92,8 +92,8 @@ tbody tr:hover{background:#fbf8f4}
 footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;color:#7b8a91;font-size:11px}
 
 /* public */
-.promo-page{background:#2c586b;color:#fff;min-height:100vh}
-.promo-banner{background:#2a5567;color:white;padding:26px clamp(24px,6vw,110px)}
+.promo-page{background:#3f6f82;color:#fff;min-height:100vh}
+.promo-banner{background:#17394b;color:white;padding:26px clamp(24px,6vw,110px);border-bottom:0}
 .promo-banner-inner{max-width:1510px;margin:auto;display:flex;align-items:center;gap:44px}
 .promo-title{font-family:var(--sans);font-weight:900;font-size:clamp(28px,3vw,44px);letter-spacing:-.04em}
 .promo-subtitle{font-family:var(--sans);font-size:18px;font-weight:800}
@@ -224,4 +224,30 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;co
 @media(max-width:760px){
   .promo-title-group{display:block}
   .promo-subtitle{font-size:15px}
+}
+
+
+/* v9 — crisp two-tone public layout */
+.promo-banner{
+  background:#17394b !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.promo-shell{
+  background:#3f6f82 !important;
+  margin:0 auto;
+  max-width:none;
+  padding:30px max(clamp(24px,3.5vw,58px), calc((100vw - 1510px)/2 + 58px)) 62px;
+}
+.promo-shell > *{
+  max-width:1510px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.promo-heading{
+  margin-top:0;
+  padding-top:0;
+}
+.promo-page{
+  background:#3f6f82 !important;
 }
