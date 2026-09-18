@@ -11,7 +11,39 @@
 
   function parseDate(v){
     if(!v) return null;
-    const d = new Date(v);
+    if(v instanceof Date) return isNaN(v) ? null : v;
+
+    const raw = String(v).trim();
+
+    // trainings.json uses DD/MM/YYYY, e.g. 24/09/2026.
+    let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2}))?/);
+    if(m){
+      const d = new Date(
+        Number(m[3]),
+        Number(m[2]) - 1,
+        Number(m[1]),
+        Number(m[4] || 0),
+        Number(m[5] || 0),
+        0, 0
+      );
+      return isNaN(d) ? null : d;
+    }
+
+    // Also accept YYYY-MM-DD and normal ISO timestamps.
+    m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/);
+    if(m && !raw.includes("T")){
+      const d = new Date(
+        Number(m[1]),
+        Number(m[2]) - 1,
+        Number(m[3]),
+        Number(m[4] || 0),
+        Number(m[5] || 0),
+        0, 0
+      );
+      return isNaN(d) ? null : d;
+    }
+
+    const d = new Date(raw);
     return isNaN(d) ? null : d;
   }
   function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
@@ -43,9 +75,24 @@
   function code(c){ return pick(c,["coursCode","code","coursId","id"],""); }
   function start(c){ return parseDate(pick(c,["dateDebut","startDate","debut","date"],null)); }
   function end(c){ return parseDate(pick(c,["dateFin","endDate","fin"],null)); }
+  function courseTime(c){
+    const hs = c && Array.isArray(c.horaires) ? c.horaires : [];
+    if(hs.length && hs[0] && hs[0].heure) return String(hs[0].heure);
+    const hp = String(pick(c,["horairePrevu"],""));
+    const m = hp.match(/(?:à|a|um)\s*(\d{1,2}:\d{2})/i) || hp.match(/\b(\d{1,2}:\d{2})\b/);
+    return m ? m[1] : "";
+  }
+  function courseDuration(c){
+    const hs = c && Array.isArray(c.horaires) ? c.horaires : [];
+    return hs.length && hs[0] && hs[0].duree ? String(hs[0].duree) : "";
+  }
   function place(c){
-    const p=pick(c,["lieu","location","site","adresse","salle"],"");
-    if(typeof p==="object") return pick(p,["nom","name","libelle","adresse"],"");
+    const p=pick(c,["adresseCours","lieu","location","site","adresse","salle"],"");
+    if(typeof p==="object"){
+      const name=pick(p,["nom","name","libelle"],"");
+      const city=pick(p,["localite","ville","city"],"");
+      return [name,city].filter((v,i,a)=>v && a.indexOf(v)===i).join(" · ");
+    }
     return p;
   }
   function trainer(c){
@@ -58,12 +105,12 @@
     return names.join(", ");
   }
   function category(c){
-    const raw=pick(c,["categorie","category","domaine","theme"],"COURS UNIPOP");
+    const raw=pick(c,["categorieNom","categorieCodeUnipop","categorie","category","domaine","theme"],"COURS UNIPOP");
     if(typeof raw==="object") return pick(raw,["nom","name","libelle"],"COURS UNIPOP");
     return String(raw).toUpperCase();
   }
   function image(c){ return pick(c,["image","imageUrl","photo","illustration","thumbnail"],""); }
-  function url(c){ return pick(c,["url","link","courseUrl","coursUrl"],"https://www.unipop.lu/"); }
+  function url(c){ return pick(c,["onlineRegistrationUrl","url","link","courseUrl","coursUrl"],"https://www.unipop.lu/"); }
   function id(c){ return String(code(c) || `${title(c)}|${pick(c,["dateDebut"],"")}`); }
 
   function loadSelected(){
@@ -86,7 +133,7 @@
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
       all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent="Live · Frank's Magic";
+      if(state) state.textContent=`Live · ${all.length} Kurse geladen`;
     }catch(e){
       all=demoData();
       if(state) state.textContent="Demo-Daten · URL prüfen";
@@ -134,7 +181,7 @@
       const d=start(c), n=count(c), sel=isSelected(c);
       return `<tr>
         <td><button class="check ${sel?"active":""}" data-action="toggle" data-id="${esc(id(c))}">${sel?"✓":""}</button></td>
-        <td><div class="date-main">${esc(fmtDate(d))}</div><div class="date-sub">${esc(timeOf(pick(c,["dateDebut"],"")))}${end(c)?" – "+esc(timeOf(pick(c,["dateFin"],""))):""}</div></td>
+        <td><div class="date-main">${esc(fmtDate(d))}</div><div class="date-sub">${esc(courseTime(c) || "—")}${courseDuration(c) ? " · "+esc(courseDuration(c)) : ""}</div></td>
         <td><div class="course-title">${esc(title(c))}</div><div class="course-code">${esc(code(c))}</div></td>
         <td><strong>${esc(place(c)||"—")}</strong></td>
         <td>${esc(trainer(c)||"—")}</td>
