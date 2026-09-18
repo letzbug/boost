@@ -160,7 +160,7 @@
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
       all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent=`v6 · Live · ${all.length} Kurse geladen`;
+      if(state) state.textContent=`v7 · Live · ${all.length} Kurse geladen`;
     }catch(e){
       all=demoData();
       if(state) state.textContent="Demo-Daten · URL prüfen";

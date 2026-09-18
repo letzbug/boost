@@ -93,7 +93,7 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;co
 
 /* public */
 .promo-page{background:#234658;color:#fff;min-height:100vh}
-.promo-banner{background:var(--pink);color:#17394b;padding:30px clamp(24px,6vw,110px)}
+.promo-banner{background:#17394b;color:white;padding:30px clamp(24px,6vw,110px)}
 .promo-banner-inner{max-width:1510px;margin:auto;display:flex;align-items:center;gap:44px}
 .promo-title{font-family:var(--sans);font-weight:900;font-size:clamp(28px,3vw,44px);letter-spacing:-.04em}
 .promo-subtitle{font-family:var(--sans);font-size:18px;font-weight:800}
@@ -183,3 +183,21 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;co
   .promo-title-group{display:block}
   .promo-subtitle{margin-top:8px}
 }
+
+
+/* v7 – darker promo banner + simplified public header */
+.promo-title{color:white}
+.promo-subtitle{color:#d9e6eb}
+.promo-banner .promo-logo{
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.18));
+}
+.promo-shell{padding-top:34px}
+.promo-heading{
+  justify-content:flex-start;
+  margin-bottom:24px;
+}
+.promo-heading h1{
+  color:white;
+}
+.promo-footer{display:none}
+.promo-count{display:none}
