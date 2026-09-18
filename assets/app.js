@@ -5,6 +5,8 @@
   let all = [];
   let candidates = [];
   let selected = loadSelected();
+  const DRAFT_KEY = "unipop_weekly_boost_drafts_v1";
+  let drafts = loadDrafts();
 
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -116,15 +118,40 @@
   function loadSelected(){
     try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}catch{return []}
   }
+  function loadDrafts(){
+    try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}");}catch{return {}}
+  }
+  function saveDrafts(){
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+  }
+  function draftFor(c){
+    const key=id(c);
+    return drafts[key] || {};
+  }
+  function setDraft(idv, patch){
+    drafts[idv] = Object.assign({}, drafts[idv] || {}, patch);
+    saveDrafts();
+
+    const sel = selected.find(x=>x.id===idv);
+    if(sel){
+      if(Object.prototype.hasOwnProperty.call(patch,"customImage")) sel.image = patch.customImage;
+      if(Object.prototype.hasOwnProperty.call(patch,"customUrl")) sel.url = patch.customUrl;
+      saveSelected();
+      renderRail();
+    }
+  }
   function saveSelected(){
     localStorage.setItem(STORAGE_KEY,JSON.stringify(selected.slice(0,MAX)));
   }
   function isSelected(c){ return selected.some(x=>x.id===id(c)); }
-  function snapshot(c){ return {
-    id:id(c), title:title(c), code:code(c), start:pick(c,["dateDebut","startDate","debut","date"],""),
-    end:pick(c,["dateFin","endDate","fin"],""), place:place(c), trainer:trainer(c), category:category(c),
-    image:image(c), url:url(c), count:count(c)
-  } }
+  function snapshot(c){
+    const d=draftFor(c);
+    return {
+      id:id(c), title:title(c), code:code(c), start:pick(c,["dateDebut","startDate","debut","date"],""),
+      end:pick(c,["dateFin","endDate","fin"],""), place:place(c), trainer:trainer(c), category:category(c),
+      image:d.customImage || image(c), url:d.customUrl || url(c), count:count(c)
+    }
+  }
 
   async function loadData(){
     const state=$("#dataState");
@@ -133,7 +160,7 @@
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
       all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent=`v4 · Live · ${all.length} Kurse geladen`;
+      if(state) state.textContent=`v5 · Live · ${all.length} Kurse geladen`;
     }catch(e){
       all=demoData();
       if(state) state.textContent="Demo-Daten · URL prüfen";
@@ -186,7 +213,33 @@
         <td><strong>${esc(place(c)||"—")}</strong></td>
         <td>${esc(trainer(c)||"—")}</td>
         <td><span class="count-badge"><i class="u${n}"></i>${n} Einschreibung${n===1?"":"en"}</span></td>
-        <td><button class="add-btn ${sel?"selected":""}" data-action="toggle" data-id="${esc(id(c))}">${sel?"Entfernen":"Promoten +"}</button></td>
+        <td>
+          <div class="row-actions">
+            <button class="add-btn ${sel?"selected":""}" data-action="toggle" data-id="${esc(id(c))}">${sel?"Entfernen":"Promoten +"}</button>
+            <button class="media-btn" data-action="media" data-id="${esc(id(c))}">Bild & Link</button>
+          </div>
+        </td>
+      </tr>
+      <tr class="media-row ${draftFor(c).open?"":"hidden"}" data-media-row="${esc(id(c))}">
+        <td></td>
+        <td colspan="6">
+          <div class="media-editor">
+            <div class="media-preview ${draftFor(c).customImage?"has-image":""}" ${draftFor(c).customImage?`style="background-image:url('${esc(draftFor(c).customImage)}')"`:""}>
+              <span>${draftFor(c).customImage?"Bild gewählt":"Kein Bild"}</span>
+            </div>
+            <div class="media-fields">
+              <label class="field-label">
+                <span>Kursbild</span>
+                <input class="file-input" type="file" accept="image/*" data-image-id="${esc(id(c))}">
+              </label>
+              <label class="field-label">
+                <span>Kurslink</span>
+                <input class="link-input" type="url" placeholder="https://www.unipop.lu/..." value="${esc(draftFor(c).customUrl || url(c) || "")}" data-link-id="${esc(id(c))}">
+              </label>
+              <div class="media-note">Das Bild und der Link werden beim ausgewählten Kurs gespeichert und in der öffentlichen Ansicht verwendet.</div>
+            </div>
+          </div>
+        </td>
       </tr>`;
     }).join("");
   }
@@ -194,7 +247,8 @@
   function renderRail(){
     const rail=$("#selectedRail"); if(!rail) return;
     const slots=[];
-    selected.slice(0,MAX).forEach((c,i)=>slots.push(`<div class="pick-slot">
+    selected.slice(0,MAX).forEach((c,i)=>slots.push(`<div class="pick-slot ${c.image?"with-thumb":""}">
+      ${c.image?`<div class="pick-thumb" style="background-image:url('${esc(c.image)}')"></div>`:""}
       <div class="pick-title">${esc(c.title)}</div>
       <div class="pick-meta">${esc(c.code||"")} · ${c.count} TN</div>
       <div class="pick-actions">
@@ -232,10 +286,39 @@
       const b=e.target.closest("[data-action]");if(!b)return;
       const a=b.dataset.action;
       if(a==="toggle") toggle(b.dataset.id);
+      if(a==="media"){
+        const idv=b.dataset.id;
+        drafts[idv]=Object.assign({},drafts[idv]||{}, {open:!(drafts[idv]&&drafts[idv].open)});
+        saveDrafts();
+        renderTable();
+      }
       if(a==="left") move(Number(b.dataset.index),-1);
       if(a==="right") move(Number(b.dataset.index),1);
       if(a==="remove"){selected.splice(Number(b.dataset.index),1);saveSelected();renderAdmin();}
     });
+    document.addEventListener("change", async e=>{
+      const f=e.target.closest("[data-image-id]");
+      if(f && f.files && f.files[0]){
+        const file=f.files[0];
+        if(!file.type.startsWith("image/")){ toast("Bitte ein Bild wählen."); return; }
+        if(file.size > 3*1024*1024){ toast("Bild bitte kleiner als 3 MB."); return; }
+        const reader=new FileReader();
+        reader.onload=()=>{
+          setDraft(f.dataset.imageId,{customImage:String(reader.result||"")});
+          renderTable();
+          toast("Bild gespeichert.");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.addEventListener("input", e=>{
+      const inp=e.target.closest("[data-link-id]");
+      if(inp){
+        setDraft(inp.dataset.linkId,{customUrl:inp.value.trim()});
+      }
+    });
+
     $("#searchInput")?.addEventListener("input",renderTable);
     $("#countFilter")?.addEventListener("change",renderTable);
     $("#clearBtn")?.addEventListener("click",()=>{selected=[];saveSelected();renderAdmin();toast("Auswahl geleert.");});

@@ -145,3 +145,26 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;co
   .promo-count{text-align:left;border-left:0;padding-left:0}
   footer,.promo-footer{flex-direction:column}
 }
+
+/* v5 — per-course media + link editor */
+.row-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.media-btn{border:1px solid var(--line);background:white;color:var(--ink);font-weight:850;padding:9px 12px;border-radius:10px;cursor:pointer}
+.media-btn:hover{background:#f6fafb}
+.media-row td{padding-top:0;background:#fbfcfc}
+.media-editor{display:grid;grid-template-columns:190px 1fr;gap:18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#f7fafb;margin:0 0 14px}
+.media-preview{height:112px;border-radius:14px;border:1px dashed #b9c8cf;background:linear-gradient(135deg,#dce8ed,#f2d6d9);background-size:cover;background-position:center;display:grid;place-items:center;overflow:hidden;color:#6c7d86;font-size:12px;font-weight:850}
+.media-preview.has-image span{background:rgba(23,57,75,.74);color:white;padding:5px 8px;border-radius:999px}
+.media-fields{display:grid;gap:12px}
+.field-label{display:grid;gap:6px}
+.field-label>span{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#6e818a}
+.file-input,.link-input{width:100%;border:1px solid var(--line);background:white;border-radius:11px;padding:10px 12px;color:var(--ink)}
+.file-input{padding:8px}
+.media-note{font-size:11px;color:#7a8b93}
+.pick-slot.with-thumb{padding-top:46px;overflow:hidden}
+.pick-thumb{position:absolute;left:0;right:0;top:0;height:36px;background-size:cover;background-position:center;opacity:.9}
+
+@media(max-width:760px){
+  .media-editor{grid-template-columns:1fr}
+  .media-preview{height:170px}
+  .row-actions{justify-content:flex-start}
+}
