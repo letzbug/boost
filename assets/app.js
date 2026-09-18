@@ -122,7 +122,14 @@
     try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}");}catch{return {}}
   }
   function saveDrafts(){
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+    try{
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+      return true;
+    }catch(e){
+      console.error("Could not save course drafts:",e);
+      toast("Speicher voll – bitte ein kleineres Bild verwenden.");
+      return false;
+    }
   }
   function draftFor(c){
     const key=id(c);
@@ -141,7 +148,14 @@
     }
   }
   function saveSelected(){
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(selected.slice(0,MAX)));
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(selected.slice(0,MAX)));
+      return true;
+    }catch(e){
+      console.error("Could not save selected courses:",e);
+      toast("Speicher voll – bitte ein kleineres Bild verwenden.");
+      return false;
+    }
   }
   function isSelected(c){ return selected.some(x=>x.id===id(c)); }
   function snapshot(c){
@@ -160,7 +174,7 @@
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
       all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent=`v9 · Live · ${all.length} Kurse geladen`;
+      if(state) state.textContent=`v10 · Live · ${all.length} Kurse geladen`;
     }catch(e){
       all=demoData();
       if(state) state.textContent="Demo-Daten · URL prüfen";
@@ -329,9 +343,15 @@
   function renderPromo(){
     if(!$(".promo-page")) return;
     selected=loadSelected();
-    $("#promoCount").textContent=selected.length;
+
+    const promoCount=$("#promoCount");
+    if(promoCount) promoCount.textContent=selected.length;
+
     const grid=$("#promoGrid");
-    $("#promoEmpty").classList.toggle("hidden",selected.length!==0);
+    const empty=$("#promoEmpty");
+    if(!grid) return;
+    if(empty) empty.classList.toggle("hidden",selected.length!==0);
+
     grid.innerHTML=selected.slice(0,MAX).map((c,i)=>{
       const d=parseDate(c.start), img=c.image?`style="background-image:url('${esc(c.image)}')"`:"";
       return `<a class="course-card" href="${esc(c.url||"https://www.unipop.lu/")}" target="_blank" rel="noopener">
