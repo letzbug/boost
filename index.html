@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#16384A">
+  <title>UniPop Weekly Boost</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="admin-page">
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="UniPop Weekly Boost">
+      <div class="brandmark"><span>u</span><span>p</span></div>
+      <div>
+        <div class="eyebrow">UNIPOP · WEEKLY BOOST</div>
+        <div class="brandline">Courses that need a little push.</div>
+      </div>
+    </a>
+    <div class="top-actions">
+      <div class="live-pill"><span class="dot"></span><span id="dataState">Daten werden geladen</span></div>
+      <a class="ghost-btn" href="promo.html" target="_blank">Öffentliche Ansicht ↗</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow coral">DONNERSTAGS-CHECK</div>
+        <h1>Die Kurse, die nächste Woche<br><span>noch Aufmerksamkeit brauchen.</span></h1>
+        <p>Automatisch gefiltert: kommende Woche · Montag–Samstag · 0–3 Einschreibungen · nur UniPop.</p>
+      </div>
+
+      <div class="week-card">
+        <div class="week-card-top">
+          <span>NÄCHSTE WOCHE</span>
+          <span class="calendar-icon">◫</span>
+        </div>
+        <div id="weekRange" class="week-range">–</div>
+        <div class="week-meta">
+          <div><strong id="candidateCount">0</strong><span>Kandidaten</span></div>
+          <div><strong id="selectedCount">0/8</strong><span>ausgewählt</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="control-panel">
+      <div class="controls-left">
+        <label class="searchbox">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Kurs, Code, Ort oder Trainer suchen…">
+        </label>
+        <select id="countFilter" class="select">
+          <option value="all">0–3 Einschreibungen</option>
+          <option value="0">nur 0</option>
+          <option value="1">nur 1</option>
+          <option value="2">nur 2</option>
+          <option value="3">nur 3</option>
+        </select>
+      </div>
+      <div class="controls-right">
+        <button id="refreshBtn" class="ghost-btn">↻ Aktualisieren</button>
+        <button id="clearBtn" class="ghost-btn danger">Auswahl leeren</button>
+        <button id="publishBtn" class="primary-btn">Auswahl speichern</button>
+      </div>
+    </section>
+
+    <section class="selection-strip">
+      <div class="selection-head">
+        <div>
+          <div class="eyebrow">DEINE AUSWAHL</div>
+          <h2>Promo Board</h2>
+        </div>
+        <div class="limit-copy">Maximal 8 Kurse · Reihenfolge per Pfeil ändern</div>
+      </div>
+      <div id="selectedRail" class="selected-rail"></div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-head">
+        <div>
+          <div class="eyebrow">VORSCHLÄGE</div>
+          <h2>Kurse mit 0–3 Einschreibungen</h2>
+        </div>
+        <div class="legend">
+          <span><i class="urgency u0"></i>0</span>
+          <span><i class="urgency u1"></i>1</span>
+          <span><i class="urgency u2"></i>2</span>
+          <span><i class="urgency u3"></i>3</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Datum</th>
+              <th>Kurs</th>
+              <th>Ort</th>
+              <th>Trainer</th>
+              <th>Einschreibungen</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="coursesBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="empty hidden">
+        <div class="empty-icon">✓</div>
+        <h3>Keine kritischen Kurse gefunden.</h3>
+        <p>Für den ausgewählten Zeitraum gibt es aktuell keine passenden Kandidaten.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span>UniPop Weekly Boost</span>
+      <span>Built by Frank G · IBM Certified AI Developer</span>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast">Gespeichert</div>
+  <script src="config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
