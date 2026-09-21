@@ -118,6 +118,74 @@
   function loadSelected(){
     try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}catch{return []}
   }
+
+  function supabaseEnabled(){
+    return Boolean(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY);
+  }
+
+  function supabaseHeaders(extra={}){
+    return Object.assign({
+      "apikey": CFG.SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${CFG.SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json"
+    }, extra);
+  }
+
+  async function loadSharedSelection(){
+    if(!supabaseEnabled()) return false;
+    try{
+      const url = `${CFG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/unipop_weekly_boost_state?id=eq.current&select=payload,updated_at`;
+      const r = await fetch(url,{
+        headers:supabaseHeaders(),
+        cache:"no-store"
+      });
+      if(!r.ok) throw new Error(`Supabase read ${r.status}`);
+      const rows = await r.json();
+      if(rows && rows[0] && Array.isArray(rows[0].payload)){
+        selected = rows[0].payload.slice(0,MAX);
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(selected)); }catch{}
+        return true;
+      }
+      return false;
+    }catch(e){
+      console.warn("Shared selection could not be loaded:",e);
+      return false;
+    }
+  }
+
+  async function publishSharedSelection(){
+    saveSelected();
+
+    if(!supabaseEnabled()){
+      toast("Nur lokal gespeichert – Supabase ist noch nicht konfiguriert.");
+      return false;
+    }
+
+    try{
+      const endpoint = `${CFG.SUPABASE_URL.replace(/\/$/,"")}/rest/v1/unipop_weekly_boost_state`;
+      const r = await fetch(endpoint,{
+        method:"POST",
+        headers:supabaseHeaders({
+          "Prefer":"resolution=merge-duplicates,return=minimal"
+        }),
+        body:JSON.stringify({
+          id:"current",
+          payload:selected.slice(0,MAX),
+          updated_at:new Date().toISOString()
+        })
+      });
+      if(!r.ok){
+        const msg = await r.text();
+        throw new Error(`Supabase write ${r.status}: ${msg}`);
+      }
+      toast(`${selected.length} Kurse zentral gespeichert.`);
+      return true;
+    }catch(e){
+      console.error("Shared selection could not be saved:",e);
+      toast("Zentrale Speicherung fehlgeschlagen.");
+      return false;
+    }
+  }
   function loadDrafts(){
     try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}");}catch{return {}}
   }
@@ -174,7 +242,7 @@
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
       all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent=`v10 · Live · ${all.length} Kurse geladen`;
+      if(state) state.textContent=`v11 · Live · ${all.length} Kurse geladen`;
     }catch(e){
       all=demoData();
       if(state) state.textContent="Demo-Daten · URL prüfen";
@@ -295,6 +363,32 @@
     t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);
   }
 
+  function compressImage(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onerror=()=>reject(reader.error);
+      reader.onload=()=>{
+        const img=new Image();
+        img.onerror=()=>reject(new Error("Invalid image"));
+        img.onload=()=>{
+          const maxW=1400, maxH=900;
+          let w=img.naturalWidth || img.width;
+          let h=img.naturalHeight || img.height;
+          const scale=Math.min(1,maxW/w,maxH/h);
+          w=Math.max(1,Math.round(w*scale));
+          h=Math.max(1,Math.round(h*scale));
+          const canvas=document.createElement("canvas");
+          canvas.width=w; canvas.height=h;
+          const ctx=canvas.getContext("2d");
+          ctx.drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL("image/jpeg",0.82));
+        };
+        img.src=String(reader.result||"");
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   function bindAdmin(){
     document.addEventListener("click",e=>{
       const b=e.target.closest("[data-action]");if(!b)return;
@@ -315,14 +409,15 @@
       if(f && f.files && f.files[0]){
         const file=f.files[0];
         if(!file.type.startsWith("image/")){ toast("Bitte ein Bild wählen."); return; }
-        if(file.size > 3*1024*1024){ toast("Bild bitte kleiner als 3 MB."); return; }
-        const reader=new FileReader();
-        reader.onload=()=>{
-          setDraft(f.dataset.imageId,{customImage:String(reader.result||"")});
+        try{
+          const compressed = await compressImage(file);
+          setDraft(f.dataset.imageId,{customImage:compressed});
           renderTable();
           toast("Bild gespeichert.");
-        };
-        reader.readAsDataURL(file);
+        }catch(err){
+          console.error(err);
+          toast("Bild konnte nicht verarbeitet werden.");
+        }
       }
     });
 
@@ -336,13 +431,12 @@
     $("#searchInput")?.addEventListener("input",renderTable);
     $("#countFilter")?.addEventListener("change",renderTable);
     $("#clearBtn")?.addEventListener("click",()=>{selected=[];saveSelected();renderAdmin();toast("Auswahl geleert.");});
-    $("#publishBtn")?.addEventListener("click",()=>{saveSelected();toast(`${selected.length} Kurse gespeichert.`);});
+    $("#publishBtn")?.addEventListener("click",publishSharedSelection);
     $("#refreshBtn")?.addEventListener("click",loadData);
   }
 
   function renderPromo(){
     if(!$(".promo-page")) return;
-    selected=loadSelected();
 
     const promoCount=$("#promoCount");
     if(promoCount) promoCount.textContent=selected.length;
@@ -394,6 +488,22 @@
     });
   }
 
-  if($(".admin-page")){bindAdmin();loadData();}
-  if($(".promo-page")) renderPromo();
+  async function initAdmin(){
+    bindAdmin();
+    await loadSharedSelection();
+    await loadData();
+    if(supabaseEnabled()){
+      const state=$("#dataState");
+      if(state && !state.textContent.includes("zentral")) state.textContent += " · zentral";
+    }
+  }
+
+  async function initPromo(){
+    const shared = await loadSharedSelection();
+    if(!shared && !supabaseEnabled()) selected=loadSelected();
+    renderPromo();
+  }
+
+  if($(".admin-page")) initAdmin();
+  if($(".promo-page")) initPromo();
 })();

@@ -4,8 +4,9 @@ window.UNIPOP_BOOST_CONFIG = {
   // DATA_URL: "https://raw.githubusercontent.com/letzbug/franks_magic/b3df21c89a53ca7bc1536aa541f9c1b72077c0e2/data/trainings.json",
   DATA_URL: "https://raw.githubusercontent.com/letzbug/franks_magic/b3df21c89a53ca7bc1536aa541f9c1b72077c0e2/data/trainings.json",
 
-  // Optional: öffentliche Supabase-Konfiguration.
-  // Wenn leer, läuft der Prototyp vollständig über localStorage.
+  // ZENTRALE AUSWAHL FÜR ALLE PCs / BROWSER
+  // Einmal die Project URL und den "anon public" Key aus Supabase eintragen.
+  // Danach sieht jeder Browser dieselbe gespeicherte Auswahl.
   SUPABASE_URL: "",
   SUPABASE_ANON_KEY: "",
 
