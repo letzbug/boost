@@ -238,15 +238,20 @@
   async function loadData(){
     const state=$("#dataState");
     try{
-      const r=await fetch(CFG.DATA_URL,{cache:"no-store"});
+      const dataUrl = new URL(CFG.DATA_URL, window.location.href);
+      dataUrl.searchParams.set("_boost_refresh", String(Date.now()));
+      const r=await fetch(dataUrl.toString(),{cache:"no-store"});
       if(!r.ok) throw new Error("HTTP "+r.status);
       const j=await r.json();
-      all=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
-      if(state) state.textContent=`v11 · Live · ${all.length} Kurse geladen`;
+      const courses=Array.isArray(j)?j:(j.trainings||j.courses||j.data||[]);
+      if(!Array.isArray(courses)) throw new Error("Ungültiges Kursdatenformat");
+      all=courses;
+      if(state) state.textContent=`Live · ${all.length} Kurse aktuell geladen`;
     }catch(e){
-      all=demoData();
-      if(state) state.textContent="Demo-Daten · URL prüfen";
-      console.warn("UniPop data fallback:",e);
+      all=[];
+      if(state) state.textContent="FEHLER: Kursdaten nicht erreichbar";
+      console.error("UniPop Kursdaten konnten nicht geladen werden:",e);
+      toast("Kursdaten nicht erreichbar – keine verlässlichen Einschreibungen!");
     }
     computeCandidates();
   }

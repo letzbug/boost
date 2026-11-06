@@ -1,8 +1,6 @@
 window.UNIPOP_BOOST_CONFIG = {
-  // HIER DIE ECHTE FRANK'S-MAGIC-URL EINTRAGEN.
-  // Beispiel:
-  // DATA_URL: "https://raw.githubusercontent.com/letzbug/franks_magic/b3df21c89a53ca7bc1536aa541f9c1b72077c0e2/data/trainings.json",
-  DATA_URL: "https://raw.githubusercontent.com/letzbug/franks_magic/b3df21c89a53ca7bc1536aa541f9c1b72077c0e2/data/trainings.json",
+  // Offizielle UniPop-Quelle (immer aktueller Stand, kein GitHub-Commit-Snapshot)
+  DATA_URL: "https://www.unipop.lu/private/trainings.json",
 
   // ZENTRALE AUSWAHL FÜR ALLE PCs / BROWSER
   // Einmal die Project URL und den "anon public" Key aus Supabase eintragen.
