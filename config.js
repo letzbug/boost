@@ -1,6 +1,7 @@
 window.UNIPOP_BOOST_CONFIG = {
-  // Offizielle UniPop-Quelle (immer aktueller Stand, kein GitHub-Commit-Snapshot)
-  DATA_URL: "https://www.unipop.lu/private/trainings.json",
+  // Live synchronisierter GitHub-Branch (statt altem fixiertem Commit).
+  // Browserfreundlich über GitHub Raw abrufbar.
+  DATA_URL: "https://raw.githubusercontent.com/letzbug/franks_magic/main/data/trainings.json",
 
   // ZENTRALE AUSWAHL FÜR ALLE PCs / BROWSER
   // Einmal die Project URL und den "anon public" Key aus Supabase eintragen.
