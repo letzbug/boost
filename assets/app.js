@@ -453,7 +453,10 @@
   }
   function reportPromoHeight(){
     if(!document.querySelector(".promo-embed") || window.parent===window) return;
-    const height=Math.ceil(document.documentElement.scrollHeight);
+    const shell=document.querySelector(".promo-shell");
+    if(!shell) return;
+    // Tatsächliche Inhaltshöhe statt der (eventuell größeren) iframe-Viewporthöhe.
+    const height=Math.ceil(shell.getBoundingClientRect().bottom + window.scrollY + 4);
     window.parent.postMessage({type:"unipop-boost-height",height},"*");
   }
   function renderPromo(){
