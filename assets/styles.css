@@ -251,3 +251,82 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:26px 4px 0;co
 .promo-page{
   background:#3f6f82 !important;
 }
+
+
+/* UniPop public iframe – scope all changes to avoid touching the working admin. */
+html:has(body.promo-embed){background:transparent}
+body.promo-embed{
+  min-height:0;
+  background:transparent !important;
+  color:#fff;
+  overflow-x:hidden;
+}
+.promo-embed .promo-shell{
+  max-width:1400px;
+  margin:0 auto;
+  padding:6px 8px 14px !important;
+  background:transparent !important;
+}
+.promo-embed .promo-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+}
+.promo-embed .course-card{
+  background:#17295b;
+  border:1px solid rgba(210,231,255,.10);
+  color:white;
+  border-radius:24px;
+  padding:17px;
+  box-shadow:0 12px 28px rgba(0,8,39,.13);
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.promo-embed .course-card:hover{transform:translateY(-4px);box-shadow:0 20px 34px rgba(0,8,39,.24)}
+.promo-embed .course-card:focus-visible{outline:3px solid #a6e7e6;outline-offset:3px}
+.promo-embed .card-art{
+  height:auto;
+  aspect-ratio:2.55/1;
+  border-radius:17px;
+  background:radial-gradient(circle at 20% 25%,#f4aaba70,transparent 35%),radial-gradient(circle at 75% 35%,#bce8e590,transparent 35%),linear-gradient(130deg,#223b5d,#446b7c);
+  background-size:cover;
+  background-position:center;
+}
+.promo-embed .card-art:after{background:linear-gradient(180deg,transparent,rgba(7,23,55,.14))}
+.promo-embed .card-art .art-number{font-size:56px;color:rgba(255,255,255,.22);top:7px;right:14px}
+.promo-embed .card-body{padding:16px 3px 2px;gap:0;min-width:0}
+.promo-embed .category-pill{
+  padding:7px 12px;
+  background:#b8ebe9;
+  color:#071c47;
+  font-size:clamp(10px,.9vw,12px);
+  letter-spacing:0;
+  line-height:1.2;
+  font-weight:850;
+  max-width:100%;
+  white-space:normal;
+}
+.promo-embed .card-title{
+  margin:12px 0 22px;
+  font-size:clamp(18px,1.65vw,25px);
+  line-height:1.18;
+  font-weight:850;
+  overflow-wrap:anywhere;
+  hyphens:auto;
+}
+.promo-embed .card-bottom{margin-top:auto;align-items:flex-end;gap:10px;min-width:0}
+.promo-embed .card-date{min-width:0;font-size:13px;line-height:1.5;font-weight:650;color:#e4edfc;overflow-wrap:anywhere}
+.promo-embed .card-date .card-date-main{display:block;color:#e4edfc;font-size:inherit;font-weight:inherit;margin:0}
+.promo-embed .card-date .card-location{display:block;color:#c2d5ee;font-size:inherit;font-weight:inherit;margin:3px 0 0}
+.promo-embed .card-arrow{flex:0 0 35px;width:35px;height:35px;background:#b8ebe9;color:#081b47;font-size:18px}
+.promo-embed .promo-empty{padding:28px 16px;color:#d2e1f5}
+@media(max-width:980px){.promo-embed .promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){
+  .promo-embed .promo-grid{grid-template-columns:1fr;gap:16px}
+  .promo-embed .promo-shell{padding:4px 4px 12px !important}
+  .promo-embed .course-card{padding:14px;border-radius:20px}
+  .promo-embed .card-title{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){.promo-embed .course-card{transition:none}}

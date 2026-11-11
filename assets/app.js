@@ -440,31 +440,48 @@
     $("#refreshBtn")?.addEventListener("click",loadData);
   }
 
+  function formatPromoDate(value){
+    const d=parseDate(value);
+    return d ? new Intl.DateTimeFormat("fr-LU",{weekday:"short",day:"numeric",month:"short"}).format(d) : "";
+  }
+  function formatPromoTime(value){
+    if(!value) return "";
+    // Do not assume midnight is a course start time for date-only values.
+    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(value)) || /^\d{4}-\d{2}-\d{2}$/.test(String(value))) return "";
+    const d=parseDate(value);
+    return d ? new Intl.DateTimeFormat("fr-LU",{hour:"2-digit",minute:"2-digit"}).format(d) : "";
+  }
+  function reportPromoHeight(){
+    if(!document.querySelector(".promo-embed") || window.parent===window) return;
+    const height=Math.ceil(document.documentElement.scrollHeight);
+    window.parent.postMessage({type:"unipop-boost-height",height},"*");
+  }
   function renderPromo(){
     if(!$(".promo-page")) return;
-
-    const promoCount=$("#promoCount");
-    if(promoCount) promoCount.textContent=selected.length;
-
     const grid=$("#promoGrid");
     const empty=$("#promoEmpty");
     if(!grid) return;
-    if(empty) empty.classList.toggle("hidden",selected.length!==0);
-
-    grid.innerHTML=selected.slice(0,MAX).map((c,i)=>{
-      const d=parseDate(c.start), img=c.image?`style="background-image:url('${esc(c.image)}')"`:"";
-      return `<a class="course-card" href="${esc(c.url||"https://www.unipop.lu/")}" target="_blank" rel="noopener">
-        <div class="card-art" ${img}><div class="art-number">${String(i+1).padStart(2,"0")}</div></div>
+    const items=selected.slice(0,MAX);
+    if(empty) empty.classList.toggle("hidden",items.length!==0);
+    grid.innerHTML=items.map((c,i)=>{
+      const background=c.image ? `style="background-image:url('${esc(c.image)}')"` : "";
+      const date=formatPromoDate(c.start);
+      const startTime=formatPromoTime(c.start);
+      const endTime=formatPromoTime(c.end);
+      const when=[date, [startTime,endTime].filter(Boolean).join(" – ")].filter(Boolean).join(" · ");
+      return `<a class="course-card" href="${esc(c.url||"https://www.unipop.lu/")}" target="_blank" rel="noopener noreferrer" aria-label="${esc(c.title)}">
+        <div class="card-art" ${background}><span class="art-number" aria-hidden="true">${String(i+1).padStart(2,"0")}</span></div>
         <div class="card-body">
-          <div class="category-pill">${esc(c.category||"COURS UNIPOP")}</div>
+          <span class="category-pill">Dernières places disponibles</span>
           <div class="card-title">${esc(c.title)}</div>
           <div class="card-bottom">
-            <div class="card-date">${d?esc(fmtDate(d)):"Nächst Woch"}<span>${esc(c.place||"UniPop")}</span></div>
-            <div class="card-arrow">→</div>
+            <div class="card-date">${when ? `<span class="card-date-main">${esc(when)}</span>` : ""}${c.place ? `<span class="card-location">${esc(c.place)}</span>` : ""}</div>
+            <div class="card-arrow" aria-hidden="true">→</div>
           </div>
         </div>
       </a>`;
     }).join("");
+    requestAnimationFrame(reportPromoHeight);
   }
 
   function demoData(){
@@ -507,6 +524,11 @@
     const shared = await loadSharedSelection();
     if(!shared && !supabaseEnabled()) selected=loadSelected();
     renderPromo();
+    if(window.ResizeObserver && $(".promo-shell")){
+      const observer=new ResizeObserver(reportPromoHeight);
+      observer.observe($(".promo-shell"));
+    }
+    window.addEventListener("load",reportPromoHeight);
   }
 
   if($(".admin-page")) initAdmin();
