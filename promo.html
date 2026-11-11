@@ -1,38 +1,21 @@
 <!doctype html>
-<html lang="lb">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#244457">
-  <title>UniPop · Dat ass Léieren.</title>
-  <link rel="stylesheet" href="assets/styles.css?v=11.0.2">
+  <meta name="theme-color" content="#061847">
+  <title>UniPop · Sélection de cours</title>
+  <link rel="stylesheet" href="assets/styles.css?v=11.1.0">
 </head>
-<body class="promo-page">
-  <section class="promo-banner">
-    <div class="promo-banner-inner">
-      <img class="promo-logo" src="assets/unipop-mark.png" alt="UniPop logo">
-      <div class="promo-title-group">
-        <div class="promo-subtitle">Les cours à ne pas manquer la semaine prochaine</div>
-      </div>
-    </div>
-  </section>
-
-  <main class="promo-shell">
-    <div class="promo-heading">
-      <div>
-        <div class="eyebrow pink"></div>
-        <h1>Votre prochaine découverte commence peut-être ici.</h1>
-      </div>
-</div>
-
-    <section id="promoGrid" class="promo-grid"></section>
-
+<body class="promo-page promo-embed">
+  <!-- Titre et fond sont gérés par WordPress : seules les cartes sont affichées ici. -->
+  <main class="promo-shell" aria-label="Sélection de cours UniPop">
+    <section id="promoGrid" class="promo-grid" aria-live="polite"></section>
     <section id="promoEmpty" class="promo-empty hidden">
-      <h2>Hei kënnt geschwënn eng nei Auswiel.</h2>
-      <p>D'Coursen fir déi nächst Woch ginn all Donneschdeg aktualiséiert.</p>
+      <p>Aucun cours à afficher pour le moment.</p>
     </section>
   </main>
-<script src="config.js?v=11.0.2"></script>
-  <script src="assets/app.js?v=11.0.2"></script>
+  <script src="config.js?v=11.1.0"></script>
+  <script src="assets/app.js?v=11.1.0"></script>
 </body>
 </html>
